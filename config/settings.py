@@ -42,6 +42,8 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'drf_yasg',
+    'rest_framework_simplejwt',
+    
 
     'apps.account',
 
@@ -147,3 +149,17 @@ EMAIL_HOST_PASSWORD = config('EMAIL_PASSWORD') # пароль от почты
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool) # вид соединения для отправки писем
 
 AUTH_USER_MODEL = 'account.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+SIMPLE_JWT = {
+    'USER_ID_FIELD': 'username',
+    'AUTH_HEADER_TYPES': ('Bearer', 'Token'),
+}
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
