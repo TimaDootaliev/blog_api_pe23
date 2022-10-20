@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     
 
     'apps.account',
+    'apps.post',
 
     
 ]
