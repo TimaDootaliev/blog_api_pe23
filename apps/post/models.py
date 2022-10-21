@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from slugify import slugify
 
+
 User = get_user_model()
 
 
@@ -38,7 +39,9 @@ class Post(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ('created_at', )
