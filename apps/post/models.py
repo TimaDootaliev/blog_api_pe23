@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from slugify import slugify
+from .utils import get_time
+
 
 
 User = get_user_model()
@@ -37,10 +39,10 @@ class Post(models.Model):
 
     def __str__(self) -> str:
         return self.title
-
+    
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            self.slug = slugify(self.title + get_time())
         super().save(*args, **kwargs)
 
     class Meta:

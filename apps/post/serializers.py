@@ -13,9 +13,21 @@ class PostListSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')
+
     class Meta:
         model = Post
         fields = '__all__'
+
+
+class PostCreateSerializer(serializers.ModelSerializer):
+    user = serializers.CurrentUserDefault()
+
+    class Meta:
+        model = Post
+        exclude = ['user']
+    
+    
 
 
 class CommentSerializer(serializers.ModelSerializer):
