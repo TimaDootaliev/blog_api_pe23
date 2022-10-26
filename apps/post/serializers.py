@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.db.models import Avg
+
 from .models import (
     Post,
     Rating,
@@ -25,6 +27,12 @@ class PostSerializer(serializers.ModelSerializer):
         representation['comments'] = CommentSerializer(
             instance.comments.all(), many=True
         ).data
+        rating = instance.ratings.aggregate(Avg('rating'))['rating__avg']
+        if rating:
+            representation['rating'] = round(rating, 1)
+        else:
+            representation['rating'] = 0.0
+        # {'rating__avg': 3.4}
         return representation
 
 
@@ -68,4 +76,9 @@ class RatingSerializer(serializers.ModelSerializer):
                 'Wrong value! Rating must be between 1 and 5'
                 )
         return attrs
+
+    def update(self, instance, validated_data):
+        instance.rating = validated_data.get('rating')
+        instance.save()
+        return super().update(instance, validated_data)
 
