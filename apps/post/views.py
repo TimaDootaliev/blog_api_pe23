@@ -19,7 +19,8 @@ from .serializers import (
     PostListSerializer,
     PostSerializer,
     PostCreateSerializer,
-    CommentSerializer
+    CommentSerializer,
+    RatingSerializer
 )
 from .permissions import IsOwner
 
@@ -48,7 +49,7 @@ class PostViewSet(ModelViewSet):
             self.permission_classes = [AllowAny]
         if self.action == 'comment' and self.request.method == 'DELETE':
             self.permission_classes = [IsOwner]
-        if self.action in ['create', 'comment']:
+        if self.action in ['create', 'comment', 'set_rating']:
             self.permission_classes = [IsAuthenticated]
         if self.action in ['destroy', 'update', 'partial_update']:
             self.permission_classes = [IsOwner]
@@ -73,8 +74,18 @@ class PostViewSet(ModelViewSet):
                 return Response(
                     'Deleted!', status=status.HTTP_204_NO_CONTENT
                 )
-            
 
+    @action(methods=['POST', 'PATCH'], detail=True, url_path='set-rating')
+    def set_rating(self, request, pk=None):
+        data = request.data.copy()
+        data['post'] = pk # TODO
+        print(data)
+        serializer = RatingSerializer(data=data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            if request.method == 'POST':
+                serializer.create(serializer.validated_data)
+                return Response(serializer.data)
+            
 
 class CommentCreateDeleteView(
     mixins.CreateModelMixin,
@@ -102,5 +113,7 @@ update() - PUT /post/1/
 # TODO: поправить удаление комментариев
 # TODO: создать модельку рейтингов
 # TODO: создание рейтинга и отображение в постах
+# TODO: добавить карусель картинок
 # TODO: создание лайков
 # TODO: отображение лайков в постах
+# TODO: фильтрация, поиск, пагинация
