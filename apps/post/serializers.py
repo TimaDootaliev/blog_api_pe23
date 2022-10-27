@@ -5,7 +5,8 @@ from .models import (
     Post,
     Rating,
     Tag,
-    Comment
+    Comment,
+    PostImage
 )
 
 
@@ -27,6 +28,8 @@ class PostSerializer(serializers.ModelSerializer):
         representation['comments'] = CommentSerializer(
             instance.comments.all(), many=True
         ).data
+        representation['carousel'] = PostImageSerializer(
+            instance.post_images.all(), many=True).data
         rating = instance.ratings.aggregate(Avg('rating'))['rating__avg']
         if rating:
             representation['rating'] = round(rating, 1)
@@ -36,15 +39,35 @@ class PostSerializer(serializers.ModelSerializer):
         return representation
 
 
+class PostImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostImage
+        fields = 'image', 
+
+
 class PostCreateSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(
         default=serializers.CurrentUserDefault(),
         source='user.username'
     )
+    carousel_img = serializers.ListField(
+        child=serializers.FileField(),
+        write_only=True
+    )
 
     class Meta:
         model = Post
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ('tag', )
+
+    def create(self, validated_data):
+        carousel_images = validated_data.pop('carousel_img')
+        post = Post.objects.create(**validated_data)
+        images = []
+        for image in carousel_images:
+            images.append(PostImage(post=post, image=image))
+        PostImage.objects.bulk_create(images)
+        return post
     
 
 class CommentSerializer(serializers.ModelSerializer):
