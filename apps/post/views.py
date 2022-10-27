@@ -89,15 +89,12 @@ class PostViewSet(ModelViewSet):
             
 
 class CommentCreateDeleteView(
-    mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
     GenericViewSet
     ):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    permission_classes = [IsOwner]
 
 
 """  
@@ -111,7 +108,6 @@ partial_update() - PATCH /post/1/
 update() - PUT /post/1/
 """
 
-# TODO: поправить удаление комментариев
 # TODO: создать модельку рейтингов
 # TODO: создание рейтинга и отображение в постах
 # TODO: добавить карусель картинок
